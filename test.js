@@ -28,18 +28,18 @@ async function loadImageAsTensor(url) {
   await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
   await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
 
-  const imgPath = process.argv[2] || (require('path').join(__dirname, '..', 'backend', 'public', 'uploads', 'candidates', require('fs').readdirSync(require('path').join(__dirname, '..', 'backend', 'public', 'uploads', 'candidates'))[0]));
-  console.log('Using image:', imgPath);
-  const t1 = await loadImageAsTensor(imgPath);
-  const t2 = await loadImageAsTensor(imgPath);
+  const t1 = await loadImageAsTensor(process.argv[2]);
+  const t2 = await loadImageAsTensor(process.argv[3]);
 
   const d1 = await faceapi.detectSingleFace(t1, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
   const d2 = await faceapi.detectSingleFace(t2, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
 
   if (!d1 || !d2) {
-    console.log('Face not detected');
+    console.log('Face not detected in one or both images');
     process.exit(1);
   }
+
   const dist = faceapi.euclideanDistance(d1.descriptor, d2.descriptor);
   console.log('Distance:', dist.toFixed(3), 'Score:', (1 - dist).toFixed(3));
+  process.exit(0);
 })();
